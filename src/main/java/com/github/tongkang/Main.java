@@ -69,7 +69,7 @@ public class Main {
         }
     }
 
-    private static Document httpGetAndParseHtml(String link) {
+    private static Document httpGetAndParseHtml(String link) throws IOException {
         //这是我们感兴趣的，我们需要处理它
         CloseableHttpClient httpclient = HttpClients.createDefault();
 
