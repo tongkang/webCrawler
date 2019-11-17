@@ -18,8 +18,7 @@ import java.util.stream.Collectors;
 
 public class Crawler {
 
-
-    private CrawlerDao dao = new JdbcCrawlerDao();
+    private CrawlerDao dao = new MyBatisCrawlerDao();
 
     public void run() throws SQLException, IOException {
 
@@ -43,17 +42,16 @@ public class Crawler {
                 storeIntoDatabaseIfNewsPage(doc, link);
 
                 //加入数据库
-                dao.updateDatabase(link, "insert into LINKS_ALREADY_PROCESSED (link) values ?");
-
+                dao.insertProcessedLink(link);
+                //dao.updateDatabase(link, "insert into LINKS_ALREADY_PROCESSED (link) values ?");
 
             }
         }
     }
 
     @SuppressFBWarnings("DMI_CONSTANT_DB_PASSWORD")
-    public void main(String[] args) throws IOException, SQLException {
+    public static void main(String[] args) throws IOException, SQLException {
         new Crawler().run();
-
 
     }
 
@@ -65,7 +63,8 @@ public class Crawler {
                 href = "https:" + href;
             }
             if (!href.toLowerCase().startsWith("javascript")) {
-                dao.updateDatabase(href, "insert into LINKS_TO_BE_PROCESSED (link) values ?");
+                dao.insertLinkToBeProcessed(href);
+                //dao.updateDatabase(href, "insert into LINKS_TO_BE_PROCESSED (link) values ?");
             }
         }
     }

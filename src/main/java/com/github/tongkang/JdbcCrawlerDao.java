@@ -1,18 +1,21 @@
 package com.github.tongkang;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class JdbcCrawlerDao implements CrawlerDao{
+public class JdbcCrawlerDao implements CrawlerDao {
 
     private static final String USERNAME = "root";
     private static final String PASSWORD = "root";
 
     private final Connection connection;
 
+    @SuppressFBWarnings("DMI_CONSTANT_DB_PASSWORD")
     public JdbcCrawlerDao() {
         try {
             this.connection = DriverManager.getConnection("jdbc:h2:file:D:\\Java_practice\\webCrawler\\news", USERNAME, PASSWORD);
@@ -22,7 +25,7 @@ public class JdbcCrawlerDao implements CrawlerDao{
     }
 
 
-    public String getNextLink(String sql) throws SQLException {
+    private String getNextLink(String sql) throws SQLException {
         ResultSet resultSet = null;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             resultSet = statement.executeQuery();
@@ -75,5 +78,15 @@ public class JdbcCrawlerDao implements CrawlerDao{
             }
         }
         return false;
+    }
+
+    @Override
+    public void insertProcessedLink(String link) {
+
+    }
+
+    @Override
+    public void insertLinkToBeProcessed(String href) {
+
     }
 }
