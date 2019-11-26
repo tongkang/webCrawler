@@ -16,43 +16,46 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class Crawler {
+public class Crawler extends Thread{
 
-    private CrawlerDao dao = new MyBatisCrawlerDao();
+    private CrawlerDao dao;
 
-    public void run() throws SQLException, IOException {
-
-        String link;
-
-        //从数据库中加载下一个链接，如果能加载到，就进行循环
-        while ((link = dao.getNextLinkThenDelete()) != null) {
-
-            //询问数据库，当前链接是不是已经被处理过了？
-            if (dao.isLinkProcessed(link)) {
-                continue;
-            }
-
-            if (isInterestingLink(link)) {
-                System.out.println(link);
-                Document doc = httpGetAndParseHtml(link);
-
-                //获取所有的链接
-                parseUrlsFromPageAndStoreIntoDatabase(doc);
-
-                storeIntoDatabaseIfNewsPage(doc, link);
-
-                //加入数据库
-                dao.insertProcessedLink(link);
-                //dao.updateDatabase(link, "insert into LINKS_ALREADY_PROCESSED (link) values ?");
-
-            }
-        }
+    public Crawler(CrawlerDao dao) {
+        this.dao = dao;
     }
 
-    @SuppressFBWarnings("DMI_CONSTANT_DB_PASSWORD")
-    public static void main(String[] args) throws IOException, SQLException {
-        new Crawler().run();
+    @Override
+    public void run() {
 
+        try {
+            String link;
+
+            //从数据库中加载下一个链接，如果能加载到，就进行循环
+            while ((link = dao.getNextLinkThenDelete()) != null) {
+
+                //询问数据库，当前链接是不是已经被处理过了？
+                if (dao.isLinkProcessed(link)) {
+                    continue;
+                }
+
+                if (isInterestingLink(link)) {
+                    System.out.println(link);
+                    Document doc = httpGetAndParseHtml(link);
+
+                    //获取所有的链接
+                    parseUrlsFromPageAndStoreIntoDatabase(doc);
+
+                    storeIntoDatabaseIfNewsPage(doc, link);
+
+                    //加入数据库
+                    dao.insertProcessedLink(link);
+                    //dao.updateDatabase(link, "insert into LINKS_ALREADY_PROCESSED (link) values ?");
+
+                }
+            }
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
     }
 
 
